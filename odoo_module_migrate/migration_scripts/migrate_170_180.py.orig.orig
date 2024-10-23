@@ -120,6 +120,7 @@ def replace_editable_attribute(
             logger.error(f"Error processing file {file}: {str(e)}")
 
 
+<<<<<<< HEAD
 def replace_slugify(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
@@ -148,10 +149,7 @@ def replace_slugify(
                     content,
                 )
             tools._write_content(file, content)
-        except Exception as e:
-            logger.error(f"Error processing file {file}: {str(e)}")
-
-
+=======
 def replace_odoo_module_from_js_assets(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
@@ -172,6 +170,7 @@ def replace_odoo_module_from_js_assets(
                 replaces,
                 log_message=f"Remove @odoo-module from js assets in file: {file}",
             )
+>>>>>>> 2707636 ([IMP] automatically remove @odoo-module from js assets)
         except Exception as e:
             logger.error(f"Error processing file {file}: {str(e)}")
 
