@@ -221,6 +221,30 @@ def replace_editable_attribute(
             logger.error(f"Error processing file {file}: {str(e)}")
 
 
+def replace_odoo_module_from_js_assets(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".js",))
+    replaces = {
+        r"/\*\*\s*@odoo-module\s*\*\*/\s*\n?": "",
+        r"/\*\s*@odoo-module\s*\*/\s*\n?": "",
+        r"/\*\*\s*@odoo-module\s*\*/\s*\n?": "",
+        r"/\*\s*@odoo-module\s*\*\*/\s*\n?": "",
+    }
+    for file in files_to_process:
+        file_str = str(file)
+        if not ("/static/src" in file_str or "/static/tests" in file_str):
+            continue
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"Remove @odoo-module from js assets in file: {file}",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
 class MigrationScript(BaseMigrationScript):
     _GLOBAL_FUNCTIONS = [
         replace_unaccent_parameter,
@@ -231,4 +255,5 @@ class MigrationScript(BaseMigrationScript):
         replace_ustr,
         replace_slugify,
         replace_editable_attribute,
+        replace_odoo_module_from_js_assets,
     ]
