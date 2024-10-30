@@ -87,7 +87,7 @@ def replace_chatter_blocks(
 def replace_user_has_groups(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
-    files_to_process = tools.get_files(module_path, (".py"))
+    files_to_process = tools.get_files(module_path, (".py",))
     replaces = {
         r"self\.user_has_groups\(\s*(['\"])([\w\.]+)\1\s*\)": r"self.env.user.has_group(\1\2\1)",
         r"self\.user_has_groups\(\s*(['\"])([^'\"]*[,!][^'\"]*?)\1\s*\)": r"self.env.user.has_groups(\1\2\1)",
@@ -119,8 +119,8 @@ def replace_editable_attribute(
         except Exception as e:
             logger.error(f"Error processing file {file}: {str(e)}")
 
-
 <<<<<<< HEAD
+
 def replace_slugify(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
@@ -149,7 +149,12 @@ def replace_slugify(
                     content,
                 )
             tools._write_content(file, content)
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
 =======
+>>>>>>> f65d6f4 ([IMP] _() improvements)
 def replace_odoo_module_from_js_assets(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
@@ -168,9 +173,27 @@ def replace_odoo_module_from_js_assets(
             tools._replace_in_file(
                 file,
                 replaces,
-                log_message=f"Remove @odoo-module from js assets in file: {file}",
-            )
->>>>>>> 2707636 ([IMP] automatically remove @odoo-module from js assets)
+                log_message=f"Remove @odoo-module from js assets in file: {file}")
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+def replace_ustr(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".py",))
+    replaces = {
+        r"from\s+odoo\.tools\s+import\s+ustr\s*\n": "",
+        r"from\s+odoo\.tools\.misc\s+import\s+ustr\s*\n": "",
+        r"from\s+odoo\.tools\s+import\s+([^,\n]*,\s*)?ustr,\s*([^,\n]*)": r"from odoo.tools import \1\2",
+        r"from\s+odoo\.tools\.misc\s+import\s+([^,\n]*,\s*)?ustr,\s*([^,\n]*)": r"from odoo.tools.misc import \1\2",
+        r",\s*ustr(\s*,)?": r"\1",
+        r"tools\.ustr\(([^)]+)\)": r"\1",
+        r"misc\.ustr\(([^)]+)\)": r"\1",
+        r"=\s*ustr\(([^)]+)\)": r"= \1",
+    }
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file, replaces, log_message=f"Deprecate ustr in: {file}")
         except Exception as e:
             logger.error(f"Error processing file {file}: {str(e)}")
 
@@ -183,4 +206,5 @@ class MigrationScript(BaseMigrationScript):
         replace_slugify,
         replace_editable_attribute,
         replace_odoo_module_from_js_assets,
+        replace_ustr,
     ]
