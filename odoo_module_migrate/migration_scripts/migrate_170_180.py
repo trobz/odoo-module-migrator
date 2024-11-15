@@ -84,6 +84,26 @@ def replace_chatter_blocks(
             logger.error(f"Error processing file {file}: {str(e)}")
 
 
+def replace_deprecated_kanban_box_card_menu(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py"))
+    replaces = {
+        "kanban-card": "card",
+        "kanban-box": "card",
+        "kanban-menu": "menu",
+    }
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"""Replace kanban-card and kanban-box with card, also change kanban-menu with menu" in file: {file}""",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
 def replace_user_has_groups(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
@@ -170,9 +190,11 @@ def replace_odoo_module_from_js_assets(
             tools._replace_in_file(
                 file,
                 replaces,
-                log_message=f"Remove @odoo-module from js assets in file: {file}")
+                log_message=f"Remove @odoo-module from js assets in file: {file}",
+            )
         except Exception as e:
             logger.error(f"Error processing file {file}: {str(e)}")
+
 
 def replace_ustr(
     logger, module_path, module_name, manifest_path, migration_steps, tools
@@ -191,13 +213,15 @@ def replace_ustr(
     for file in files_to_process:
         try:
             tools._replace_in_file(
-                file, replaces, log_message=f"Deprecate ustr in: {file}")
+                file, replaces, log_message=f"Deprecate ustr in: {file}"
+            )
         except Exception as e:
             logger.error(f"Error processing file {file}: {str(e)}")
 
 
 class MigrationScript(BaseMigrationScript):
     _GLOBAL_FUNCTIONS = [
+        replace_deprecated_kanban_box_card_menu,
         replace_tree_with_list_in_views,
         replace_chatter_blocks,
         replace_user_has_groups,
