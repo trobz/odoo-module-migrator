@@ -135,6 +135,10 @@
                             <div>
                                 <field name="partner_id" />
                             </div>
+                            <ul data-field="color"
+                                class="oe_kanban_colorpicker"
+                                modifiers="{}"
+                            />
                         </div>
                     </t>
                 </templates>
@@ -153,6 +157,10 @@
                             <div>
                                 <field name="partner_id" />
                             </div>
+                            <ul class="oe_kanban_colorpicker"
+                                data-field="color"
+                                modifiers="{}"
+                            />
                         </div>
                     </t>
                 </templates>
