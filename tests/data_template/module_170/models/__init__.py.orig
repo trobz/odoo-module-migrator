@@ -1,6 +1,0 @@
-from . import res_partner
-<<<<<<< HEAD
-from . import website
-=======
-from . import fetchmail
->>>>>>> f65d6f4 ([IMP] _() improvements)
