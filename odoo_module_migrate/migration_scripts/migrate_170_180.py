@@ -239,7 +239,7 @@ def replace_editable_attribute(
 def replace_slugify(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
-    files_to_process = tools.get_files(module_path, (".py"))
+    files_to_process = tools.get_files(module_path, (".py",))
 
     for file in files_to_process:
         try:
