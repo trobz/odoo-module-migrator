@@ -9,7 +9,7 @@ import re
 def replace_tree_with_list_in_views(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
-    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py"))
+    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py",))
 
     reg_tree_to_list_xml_mode = re.compile(
         r"""(<field[^>]* name=["'](view_mode|name|binding_view_types)["'][^>]*>([^<>]+[,.])?\s*)tree(\s*([,.][^<>]+)?</field>)"""
@@ -87,7 +87,7 @@ def replace_chatter_blocks(
 def replace_deprecated_kanban_box_card_menu(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
-    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py"))
+    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py",))
     replaces = {
         "kanban-card": "card",
         "kanban-box": "card",
@@ -219,7 +219,7 @@ def replace_type_edit(
 def replace_editable_attribute(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
-    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py"))
+    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py",))
     replaces = {
         'editable="1"': 'editable="bottom"',
         "editable='1'": 'editable="bottom"',
