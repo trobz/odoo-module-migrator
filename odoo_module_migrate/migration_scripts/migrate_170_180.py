@@ -9,7 +9,7 @@ import re
 def replace_tree_with_list_in_views(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
-    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py"))
+    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py",))
 
     reg_tree_to_list_xml_mode = re.compile(
         r"""(<field[^>]* name=["'](view_mode|name|binding_view_types)["'][^>]*>([^<>]+[,.])?\s*)tree(\s*([,.][^<>]+)?</field>)"""
@@ -84,6 +84,26 @@ def replace_chatter_blocks(
             logger.error(f"Error processing file {file}: {str(e)}")
 
 
+def replace_deprecated_kanban_box_card_menu(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py",))
+    replaces = {
+        "kanban-card": "card",
+        "kanban-box": "card",
+        "kanban-menu": "menu",
+    }
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"""Replace kanban-card and kanban-box with card, also change kanban-menu with menu" in file: {file}""",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
 def replace_user_has_groups(
     logger, module_path, module_name, manifest_path, migration_steps, tools
 ):
@@ -100,9 +120,240 @@ def replace_user_has_groups(
             logger.error(f"Error processing file {file}: {str(e)}")
 
 
+def remove_deprecated_kanban_click_classes(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".xml",))
+
+    replaces = {
+        "oe_kanban_global_click_edit": "",
+        "oe_kanban_global_click": "",
+    }
+
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"Remove deprecated kanban click classes in file: {file}",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
+def replace_kanban_color_picker_widget(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".xml",))
+
+    replaces = {
+        # Case 1: Match any ul tag containing both oe_kanban_colorpicker class and data-field
+        # Example: <ul class="oe_kanban_colorpicker some-class" data-field="color" some-attr="value"/>
+        # Example: <ul data-field="color" t-if="condition" class="oe_kanban_colorpicker other-class"/>
+        r'<ul[^>]*?class="[^"]*?oe_kanban_colorpicker[^"]*?"[^>]*?data-field="([^"]+)"[^>]*?>(?:</ul>)?': r'<field name="\1" widget="kanban_color_picker"/>',
+        # Case 2: Same as Case 1 but with data-field appearing before class
+        # Example: <ul data-field="color" class="some-class oe_kanban_colorpicker" some-attr="value"/>
+        # Example: <ul some-attr="value" data-field="color" class="oe_kanban_colorpicker"/>
+        r'<ul[^>]*?data-field="([^"]+)"[^>]*?class="[^"]*?oe_kanban_colorpicker[^"]*?"[^>]*?>(?:</ul>)?': r'<field name="\1" widget="kanban_color_picker"/>',
+    }
+
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"Replace kanban colorpicker with field widget in file: {file}",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
+def remove_kanban_tooltip(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".xml",))
+    reg_tooltip_template = (
+        r"""<t\s+t-name=["']kanban-tooltip["'][^>]*>[\s\S]*?</t>\s*"""
+    )
+    reg_tooltip_attr = r"""\s+tooltip=["']kanban-tooltip["']"""
+
+    replaces = {
+        reg_tooltip_template: "",
+        reg_tooltip_attr: "",
+    }
+
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"Removed kanban tooltip feature in file: {file}",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
+def replace_type_edit(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    """Replace type='edit' with type='open' in elements."""
+    files_to_process = tools.get_files(module_path, (".xml",))
+
+    reg_type_edit = r"""type=["']edit["']"""
+
+    replaces = {
+        reg_type_edit: 'type="open"',
+    }
+
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"Replaced type='edit' with type='open' in file: {file}",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
+def replace_editable_attribute(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".xml", ".js", ".py",))
+    replaces = {
+        'editable="1"': 'editable="bottom"',
+        "editable='1'": 'editable="bottom"',
+        r'<attribute\s+name=["\']editable["\']>1</attribute>': '<attribute name="editable">bottom</attribute>',
+    }
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"""Replace editable="1" by "bottom" in file: {file}""",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
+def replace_slugify(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".py",))
+
+    for file in files_to_process:
+        try:
+            content = tools._read_content(file)
+            content = re.sub(
+                r"from\s+odoo\.addons\.http_routing\.models\.ir_http\s+import\s+slugify\b.*\n",
+                "",
+                content,
+            )
+            # process in controller (*.py) file are using request
+            has_request = "request" in content
+            if has_request:
+                content = re.sub(
+                    r"""(?<!request\.)\bslugify\(([^)]+)\)""",
+                    r"""request.env["ir.http"]._slugify(\1)""",
+                    content,
+                )
+            else:
+                content = re.sub(
+                    r"""\bslugify\(([^)]+)\)""",
+                    r"""self.env["ir.http"]._slugify(\1)""",
+                    content,
+                )
+            tools._write_content(file, content)
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
+def replace_odoo_module_from_js_assets(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".js",))
+    replaces = {
+        r"/\*\*\s*@odoo-module\s*\*\*/\s*\n?": "",
+        r"/\*\s*@odoo-module\s*\*/\s*\n?": "",
+        r"/\*\*\s*@odoo-module\s*\*/\s*\n?": "",
+        r"/\*\s*@odoo-module\s*\*\*/\s*\n?": "",
+    }
+    for file in files_to_process:
+        file_str = str(file)
+        if not ("/static/src" in file_str or "/static/tests" in file_str):
+            continue
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"Remove @odoo-module from js assets in file: {file}",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
+def replace_ustr(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".py",))
+    replaces = {
+        r"from\s+odoo\.tools\s+import\s+ustr\s*\n": "",
+        r"from\s+odoo\.tools\.misc\s+import\s+ustr\s*\n": "",
+        r"from\s+odoo\.tools\s+import\s+([^,\n]*,\s*)?ustr,\s*([^,\n]*)": r"from odoo.tools import \1\2",
+        r"from\s+odoo\.tools\.misc\s+import\s+([^,\n]*,\s*)?ustr,\s*([^,\n]*)": r"from odoo.tools.misc import \1\2",
+        r",\s*ustr(\s*,)?": r"\1",
+        r"tools\.ustr\(([^)]+)\)": r"\1",
+        r"misc\.ustr\(([^)]+)\)": r"\1",
+        r"=\s*ustr\(([^)]+)\)": r"= \1",
+    }
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file, replaces, log_message=f"Deprecate ustr in: {file}"
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
+def replace_unaccent_parameter(
+    logger, module_path, module_name, manifest_path, migration_steps, tools
+):
+    files_to_process = tools.get_files(module_path, (".py",))
+    replaces = {
+        # Handle multiline with only unaccent=False
+        r"(?s)fields\.(Char|Text|Html|Properties)\(\s*unaccent\s*=\s*False\s*,?\s*\)": r"fields.\1()",
+        # Handle when unaccent=False is first parameter
+        r"(?s)fields\.(Char|Text|Html|Properties)\(\s*unaccent\s*=\s*False\s*,\s*([^)]+?)\)": r"fields.\1(\2)",
+        # Handle when unaccent=False is between other parameters
+        r"(?s)fields\.(Char|Text|Html|Properties)\(([^)]+?),\s*unaccent\s*=\s*False\s*,\s*([^)]+?)\)": r"fields.\1(\2, \3)",
+        # Handle when unaccent=False is the last parameter
+        r"(?s)fields\.(Char|Text|Html|Properties)\(([^)]+?),\s*unaccent\s*=\s*False\s*\)": r"fields.\1(\2)",
+    }
+
+    for file in files_to_process:
+        try:
+            tools._replace_in_file(
+                file,
+                replaces,
+                log_message=f"[18.0] Removed deprecated unaccent=False parameter in file: {file}",
+            )
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {str(e)}")
+
+
 class MigrationScript(BaseMigrationScript):
     _GLOBAL_FUNCTIONS = [
+        remove_deprecated_kanban_click_classes,
+        replace_kanban_color_picker_widget,
+        remove_kanban_tooltip,
+        replace_type_edit,
+        replace_deprecated_kanban_box_card_menu,
+        replace_unaccent_parameter,
         replace_tree_with_list_in_views,
         replace_chatter_blocks,
         replace_user_has_groups,
+        replace_slugify,
+        replace_editable_attribute,
+        replace_odoo_module_from_js_assets,
+        replace_ustr,
     ]
