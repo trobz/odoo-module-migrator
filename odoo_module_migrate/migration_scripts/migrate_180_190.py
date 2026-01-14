@@ -77,7 +77,12 @@ def upgrade_sql_constraints(
 
     # Function to build the new SQL constraint definition
     def build_sql_object(match):
-        constraints = ast.literal_eval("[" + match.group(1) + "]")
+        try:
+            constraints = ast.literal_eval("[" + match.group(1) + "]")
+        except SyntaxError:
+            # Ignore the error "SyntaxError: '[' was never closed" when the constraint
+            # is commented
+            return match.group(0)
         result = []
         for name, definition, *messages in constraints:
             message = messages[0] if messages else ""

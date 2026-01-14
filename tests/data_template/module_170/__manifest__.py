@@ -10,5 +10,11 @@
     ],
     'data': [
         'views/res_partner.xml',
+        'views/product_template_view.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'module_170/static/src/js/main.js',
+        ],
+    },
 }
